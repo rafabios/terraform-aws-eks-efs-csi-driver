@@ -1,7 +1,9 @@
 # terraform-aws-eks-efs-csi-driver
 
-[![Lint Status](https://github.com/DNXLabs/terraform-aws-eks-efs-csi-driver/workflows/Lint/badge.svg)](https://github.com/DNXLabs/terraform-aws-eks-efs-csi-driver/actions)
-[![LICENSE](https://img.shields.io/github/license/DNXLabs/terraform-aws-eks-efs-csi-driver)](https://github.com/DNXLabs/terraform-aws-eks-efs-csi-driver/blob/master/LICENSE)
+#### This is forked from DNXLabs/terraform-aws-eks-efs-csi-driver but with dinamiyc provisioning!
+
+[![Lint Status](https://github.com/rafabios/terraform-aws-eks-efs-csi-driver/workflows/Lint/badge.svg)](https://github.com/DNXLabs/terraform-aws-eks-efs-csi-driver/actions)
+[![LICENSE](https://img.shields.io/github/license/rafabios/terraform-aws-eks-efs-csi-driver)](https://github.com/rafabios/terraform-aws-eks-efs-csi-driver/blob/master/LICENSE)
 
 Terraform module for deploying [aws-efs-csi-driver](https://github.com/kubernetes-sigs/aws-efs-csi-driver)  inside a pre-existing EKS cluster.
 
@@ -10,13 +12,52 @@ The [Amazon Elastic File System](https://aws.amazon.com/efs/) Container Storage 
 ## Usage
 ```
 module "efs_csi_driver" {
-  source = "git::https://github.com/DNXLabs/terraform-aws-eks-efs-csi-driver.git"
+  source = "git::https://github.com/rafabios/terraform-aws-eks-efs-csi-driver.git"
 
   cluster_name                     = module.eks_cluster.cluster_id
   cluster_identity_oidc_issuer     = module.eks_cluster.cluster_oidc_issuer_url
   cluster_identity_oidc_issuer_arn = module.eks_cluster.oidc_provider_arn
+  efs_id                           = aws.efs_file_system.efs-example.id
+  efs_provision_mode               = "efs-ap"
 }
 ```
+
+#### Simple K8s deploy:
+
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nginx-pvc-claim
+spec:
+  storageClassName: efs-sc
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pv-pod
+spec:
+  containers:
+    - name: nginx-container
+      image: nginx
+      ports:
+        - containerPort: 80
+          name: "http-server"
+      volumeMounts:
+        - mountPath: "/usr/share/nginx/html"
+          name: nginx-storage
+  volumes:
+    - name: nginx-storage
+      persistentVolumeClaim:
+        claimName: nginx-pvc-claim
+
+```
+
 
 ## Examples
 Before the example, you need to:
@@ -89,8 +130,8 @@ No output.
 
 ## Authors
 
-Module managed by [DNX Solutions](https://github.com/DNXLabs).
+Module managed by [Vemcompy](https://github.com/rafabios).
 
 ## License
 
-Apache 2 Licensed. See [LICENSE](https://github.com/DNXLabs/terraform-aws-eks-efs-csi-driver/blob/master/LICENSE) for full details.
+Apache 2 Licensed. See [LICENSE](https://github.com/rafabios/terraform-aws-eks-efs-csi-driver/blob/master/LICENSE) for full details.
