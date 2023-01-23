@@ -66,6 +66,18 @@ variable "storage_class_name" {
   description = "Storage class name for EFS CSI driver."
 }
 
+variable "efs_id" {
+  type        = string
+  default     = "fs-xxxxxxxx"
+  description = "Aws EFS id."
+}
+
+variable "efs_provision_mode" {
+  type        = string
+  default     = "efs-ap"
+  description = "Provision Mode for Aws EFS."
+}
+
 variable "create_storage_class" {
   type        = bool
   default     = true
